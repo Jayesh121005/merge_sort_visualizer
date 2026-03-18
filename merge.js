@@ -1,150 +1,77 @@
-// Canvas variables
-var canvas, canvaswidth, canvasheight, ctrl;
+let array = [];
+let delay = 50;
 
-// Call canvasElements() to store height width
-// in above canvas variables
-canvasElements();
+const container = document.getElementById("array-container");
 
-// 3 array are declared
+function generateArray(size = 100) {
+  array = [];
+  container.innerHTML = "";
 
-//1) arr is for storing array element 
-//2) itmd for storing intermediate values
-//3) visited is for element which has been sorted
-var arr = [], itmd = [], visited = []
+  for (let i = 0; i < size; i++) {
+    let value = Math.floor(Math.random() * 300) + 10;
+    array.push(value);
 
-
-// Length of unsorted array
-var len_of_arr = 40;
-
-// Store random value in arr[]
-for (var i = 0; i < len_of_arr; i++) {
-    arr.push(Math.round(Math.random() * 250) )
+    const bar = document.createElement("div");
+    bar.style.height = `${value}px`;
+    bar.classList.add("bar");
+    container.appendChild(bar);
+  }
 }
 
-// Initialize itmd and visited array with 0
-for (var i = 0; i < len_of_arr; i++) {
-    itmd.push(0)
-    visited.push(0)
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Merging of two sub array
-// https://www.geeksforgeeks.org/merge-two-sorted-arrays/
-function mergeArray(start, end) {
-    let mid = parseInt((start + end) >> 1);
-    let start1 = start, start2 = mid + 1
-    let end1 = mid, end2 = end
-    
-    // Initial index of merged subarray
-    let index = start
+function updateBars() {
+  const bars = document.getElementsByClassName("bar");
+  for (let i = 0; i < array.length; i++) {
+    bars[i].style.height = `${array[i]}px`;
+  }
+}
 
-    while (start1 <= end1 && start2 <= end2) {
-        if (arr[start1] <= arr[start2]) {
-            itmd[index] = arr[start1]
-            index = index + 1
-            start1 = start1 + 1;
-        }
-        else if(arr[start1] > arr[start2]) {
-            itmd[index] = arr[start2]
-            index = index + 1
-            start2 = start2 + 1;
-        }
+async function merge(l, m, r) {
+  let left = array.slice(l, m + 1);
+  let right = array.slice(m + 1, r + 1);
+
+  let i = 0, j = 0, k = l;
+
+  while (i < left.length && j < right.length) {
+    if (left[i] <= right[j]) {
+      array[k++] = left[i++];
+    } else {
+      array[k++] = right[j++];
     }
+    updateBars();
+    await sleep(delay);
+  }
 
-    // Copy the remaining elements of
-    // arr[], if there are any
-    while (start1 <= end1) {
-        itmd[index] = arr[start1]
-        index = index + 1
-        start1 = start1 + 1;
-    }
+  while (i < left.length) {
+    array[k++] = left[i++];
+    updateBars();
+    await sleep(delay);
+  }
 
-    while (start2 <= end2) {
-        itmd[index] = arr[start2]
-        index = index + 1
-        start2 = start2 + 1;
-    }
-
-    index = start
-    while (index <= end) {
-        arr[index] = itmd[index];
-        index++;
-    }
+  while (j < right.length) {
+    array[k++] = right[j++];
+    updateBars();
+    await sleep(delay);
+  }
 }
 
-// Function for showing visualization 
-// effect
-function drawBars(start, end) {
+async function mergeSort(l, r) {
+  if (l >= r) return;
 
-    // Clear previous unsorted bars
-    ctrl.clearRect(0, 0, 1000, 1500)
+  let m = Math.floor((l + r) / 2);
 
-    // Styling of bars
-    for (let i = 0; i < len_of_arr; i++) {
-
-        // Changing styles of bars
-        ctrl.fillStyle = "black"
-        ctrl.shadowOffsetX = 2
-        ctrl.shadowColor = "chocolate";
-        ctrl.shadowBlur = 3;
-        ctrl.shadowOffsetY =5;
-       
-        
-        // Size of rectangle of bars
-        ctrl.fillRect(25 * i, 300 - arr[i], 20, arr[i])
-        
-        if (visited[i]) {
-            ctrl.fillStyle = "#006d13"
-            ctrl.fillRect(25 * i, 300 - arr[i], 20, arr[i])
-            ctrl.shadowOffsetX = 2
-        }
-    }
-
-    for (let i = start; i <= end; i++) {
-        ctrl.fillStyle = "orange"
-        ctrl.fillRect(25 * i, 300 - arr[i], 18, arr[i])
-        ctrl.fillStyle = "#cdff6c"
-        ctrl.fillRect(25 * i,300, 18, arr[i])
-        visited[i] = 1
-    }
+  await mergeSort(l, m);
+  await mergeSort(m + 1, r);
+  await merge(l, m, r);
 }
 
-// Waiting interval between two bars
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+async function startSort() {
+  delay = 101 - document.getElementById("speed").value;
+  await mergeSort(0, array.length - 1);
 }
 
-
-// Merge Sorting
-const mergeSort = async (start, end) => {
-    if (start < end) {
-        let mid = parseInt((start + end) >> 1)
-        await mergeSort(start, mid)
-        await mergeSort(mid + 1, end)
-        await mergeArray(start, end)
-        await drawBars(start, end)
-
-        // Waiting time is 800ms
-        await timeout(800)
-    }
-}
-
-// canvasElements function for storing
-// width and height in canvas variable
-function canvasElements() {
-    canvas = document.getElementById("Canvas")
-    canvas.width = canvas.height = 1000
-    canvaswidth = canvas.width
-    canvasheight = canvas.height
-    ctrl = canvas.getContext("2d")
-}
-
-// Asynchronous MergeSort function 
-const performer = async () => {
-    await mergeSort(0, len_of_arr - 1)
-    await drawBars()
-
-    // Code for change title1 text 
-    const title1_changer = document.querySelector(".title1")
-    title1_changer.innerText = "Array is completely sorted"
-}
-performer()
+// Initial array
+generateArray();
