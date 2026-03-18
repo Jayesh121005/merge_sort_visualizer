@@ -44,12 +44,6 @@ Merge Sort is a **Divide and Conquer** algorithm:
 
 ---
 
-## 📷 Preview
-
-(Add a screenshot here later)
-
----
-
 ## 🚀 Getting Started
 
 ### Clone the repository
