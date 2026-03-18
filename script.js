@@ -12,8 +12,9 @@ function generateArray(size = 100) {
     array.push(value);
 
     const bar = document.createElement("div");
-    bar.style.height = `${value}px`;
+    bar.style.height = value + "px";
     bar.classList.add("bar");
+
     container.appendChild(bar);
   }
 }
@@ -25,7 +26,7 @@ function sleep(ms) {
 function updateBars() {
   const bars = document.getElementsByClassName("bar");
   for (let i = 0; i < array.length; i++) {
-    bars[i].style.height = `${array[i]}px`;
+    bars[i].style.height = array[i] + "px";
   }
 }
 
@@ -73,5 +74,5 @@ async function startSort() {
   await mergeSort(0, array.length - 1);
 }
 
-// Initial array
-generateArray();
+// IMPORTANT: wait until page loads
+window.onload = generateArray;
